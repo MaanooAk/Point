@@ -26,8 +26,8 @@ public class Point {
     }
     
     public Point(float angle) {
-        this.x = (float) Math.cos(angle);
-        this.y = (float) Math.sin(angle);
+        x = (float) Math.cos(angle);
+        y = (float) Math.sin(angle);
     }
     
     public Point(Point other) {
@@ -165,9 +165,9 @@ public class Point {
     }
     
     public Point rotate(float angle, Point center) {
-        this.sub(center);
-        this.rotate(angle);
-        this.add(center);
+        sub(center);
+        rotate(angle);
+        add(center);
         return this;
     }
     
