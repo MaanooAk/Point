@@ -36,3 +36,8 @@ b = p1.isZero() || p2.isNorm();
 speed = new Point(angle).mul(ac);
 location.add(speed);
 ```
+No need for getters and setters
+```java
+p.x = p.y = (p.x + p.y) / 2;
+// instead of p.setY((p.getX() + p.getY()) / 2); p.setX(p.getY());
+```
