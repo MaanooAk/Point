@@ -14,7 +14,7 @@ Point p3 = new Point(1.5f * TAU);
 Point p4 = new Point(p3);
 Point p5 = p3.clone();
 ```
-Maniputale points
+Manipulate points
 ```java
 p1.x += 2.6f;
 p1.add(2.6f, 0);
