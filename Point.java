@@ -7,15 +7,15 @@
  * 
  * @author Akritas
  */
-public class Point {
-    
+public class Point implements Cloneable {
+
     // Public members, no need for getters and setter
-    
+
     public float x;
     public float y;
-    
+
     // Constructors
-    
+
     public Point() {
         x = y = 0.0f;
     }
@@ -24,42 +24,44 @@ public class Point {
         this.x = x;
         this.y = y;
     }
-    
+
     public Point(float angle) {
-        x = (float) Math.cos(angle);
-        y = (float) Math.sin(angle);
+        this.x = (float) -Math.sin(Math.toRadians(angle));
+        this.y = (float) Math.cos(Math.toRadians(angle));
     }
-    
+
     public Point(Point other) {
         x = other.x;
         y = other.y;
     }
-    
-    // Ovveride
-    
-    @Override
-    public String toString() {
-        return "[" + Float.toString(x) + ", " + Float.toString(y) + "]";
+
+    // Fake constructors
+
+    public Point init() {
+        x = y = 0.0f;
+        return this;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Point)) return false;
-        final Point other = (Point) obj;
-        return this.x == other.x && this.y == other.y;
-    }   
+    public Point init(float x, float y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
 
-    @Override
-    public int hashCode() {
-        return Float.floatToIntBits(x) ^ Float.floatToIntBits(y);
+    public Point init(float angle) {
+        this.x = (float) -Math.sin(Math.toRadians(angle));
+        this.y = (float) Math.cos(Math.toRadians(angle));
+        return this;
     }
-    
-    public Point clone() {
-        return new Point(x, y);
+
+    public Point init(Point point) {
+        this.x = point.x;
+        this.y = point.y;
+        return this;
     }
-    
+
     // Is
-    
+
     public boolean isZero() {
         return x == 0 && y == 0;
     }
@@ -67,69 +69,66 @@ public class Point {
     public boolean isNorm() {
         return lenSq() == 1;
     }
-    
-    // Setting
-    
+
+    // Simple
+
     public Point set(Point v) {
         x = v.x;
         y = v.y;
         return this;
     }
-    public Point set(float x, float y) {
-        this.x = x;
-        this.y = y;
-        return this;
-    }     
-    
-    public Point swap(Point v) {
-        float o = x;
-        x = v.x;
-        v.x = o;
-        o = y;
-        y = v.y;
-        v.y = o;
-        return this;
-    }
-    
-    // Basic operations
-    
-    public Point add(float x, float y) {
-        this.x += x;
-        this.y += y;
-        return this;
-    }
-    public Point sub(float x, float y) {
-        this.x -= x;
-        this.y -= y;
-        return this;
-    }
-    public Point mul(float v) {
-        x *= v;
-        y *= v;
-        return this;
-    }
-    public Point div(float v) {
-        x /= v;
-        y /= v;
-        return this;
-    }
-    
+
     public Point add(Point v) {
         x += v.x;
         y += v.y;
         return this;
     }
+
     public Point sub(Point v) {
         x -= v.x;
         y -= v.y;
         return this;
     }
-    
+
+    public Point mul(float v) {
+        x *= v;
+        y *= v;
+        return this;
+    }
+
+    public Point div(float v) {
+        x /= v;
+        y /= v;
+        return this;
+    }
+
+    public Point add(float dx, float dy) {
+        x += dx;
+        y += dy;
+        return this;
+    }
+
+    public Point swap(Point v) {
+        final float ox = x, oy = y;
+        x = v.x;
+        y = v.y;
+        v.x = ox;
+        v.y = oy;
+        return this;
+    }
+
+    public Point addAngled(float angle, float len) {
+        x += len * (float) -Math.sin(Math.toRadians(angle));
+        y += len * (float) Math.cos(Math.toRadians(angle));
+        return this;
+    }
+
     // complex
-    
+
     public float len() {
         return (float) Math.sqrt(x * x + y * y);
     }
+
     public float lenSq() {
         return x * x + y * y;
     }
@@ -137,43 +136,53 @@ public class Point {
     public float dis(Point p) {
         return (float) Math.sqrt(pow2(x - p.x) + pow2(y - p.y));
     }
+
     public float disSq(Point p) {
         return pow2(x - p.x) + pow2(y - p.y);
     }
-    
-    private static float pow2(float x) {
-        return x*x;
+
+    public float disAngle(Point p) {
+        final float x = this.x - p.x;
+        final float y = this.y - p.y;
+        return (float) Math.toDegrees(Math.atan2(x, -y)) + 180;
     }
-    
+
+    private static float pow2(float x) {
+        return x * x;
+    }
+
     public Point norm() {
-        float len = this.len();
-        if (len != 0) this.div(len);
+        final float len = len();
+        if (len != 0) div(len);
         return this;
     }
-    
+
     public float dot(Point v) {
-        return x*v.x + y*v.y;
+        return x * v.x + y * v.y;
     }
-    
+
     public Point rotate(float angle) {
-        float c = (float) Math.cos(angle);
-        float s = (float) Math.sin(angle);
-        float ox = x, oy = y; // old
+        final float c = (float) Math.cos(Math.toRadians(angle));
+        final float s = (float) Math.sin(Math.toRadians(angle));
+        final float ox = x, oy = y; // old
         x = c * ox - s * oy;
         y = s * ox + c * oy;
         return this;
     }
-    
-    public Point rotate(float angle, Point center) {
-        sub(center);
+
+    public Point rotate(float angle, Point p) {
+        sub(p);
         rotate(angle);
-        add(center);
+        add(p);
         return this;
     }
-    
-    
+
     public float angle() {
         return (float) (Math.atan2(y, x));
+    }
+
+    public float angleDeg() {
+        return (float) Math.toDegrees(Math.atan2(x, -y)) + 180;
     }
     
     // Rounding
@@ -195,11 +204,33 @@ public class Point {
         y = (float) Math.floor(y);
         return this;
     }
-    
-    // Complex
-        
+
+    // Comlex
+
     public int dsign(Point v) {
         return y * v.x > x * v.y ? 1 : -1;
     }
-    
+
+    // Overrides
+
+    @Override
+    public Point clone() {
+        return new Point(x, y);
+    }
+
+    @Override
+    public int hashCode() {
+        return Float.hashCode(x) ^ Float.hashCode(y);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        final Point other = (Point) o;
+        return x == other.x && y == other.y;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + Float.toString(x) + ", " + Float.toString(y) + "]";
+    }
 }
